@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import React, { useState, FormEvent } from "react";
 import { signup } from "@/lib/auth";
 import { databases } from "@/lib/appwrite";
+import { useUser } from "@/context/UserContext";
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,6 +20,8 @@ export default function SignUpForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  const { fetchUser } = useUser();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -32,8 +35,9 @@ export default function SignUpForm() {
         process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "",
         process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID || "",
         user.$id,
-        { email, name, role: "view-only" }
+        { email, name, role: "view-only", status: "Active" }
       )
+      await fetchUser();
       router.push("/"); // Redirect to dashboard on success
     } catch (err: any) {
       setError(err.message || "Signup failed. Please try again.");
